@@ -3,12 +3,8 @@ import java.util.*;
 public class LifeBoard {
     protected List<Cell> LiveCells;
 
-    public LifeBoard(List<List<Integer>> liveCoordinates) {
-        List<Cell> LiveCells = new ArrayList<Cell>();
-        for(List<Integer> coordinates: liveCoordinates) {
-            LiveCells.add(new Cell(true, coordinates.get(0), coordinates.get(1)));
-        }
-        this.LiveCells = LiveCells;
+    public LifeBoard(List<Cell> liveCells) {
+        this.LiveCells = List.copyOf(liveCells);
     }
 
     public List<Cell> getLiveCells() {
@@ -42,17 +38,9 @@ public class LifeBoard {
 
         for (Cell cell: pertinentCells) {
             int liveNeighbourCount = getLiveNeighbourCount(cell, liveCoordinates);
-            // Cell with less than 2 or greater than 3 neighbour dies due to loneliness or overcrowding
-            if (liveNeighbourCount<2 || liveNeighbourCount > 3) {
-                continue;
-            }
-            // Live cell with two or three live neighbours lives, unchanged, to the next generation
-            if (cell.getLive() && (liveNeighbourCount == 3 || liveNeighbourCount == 2)){
+            boolean isAliveNextTick = cell.lifeNextTick(liveNeighbourCount);
+            if (isAliveNextTick) {
                 newLiveCells.add(cell);
-            }
-            // Any dead cell with exactly three live neighbours comes to life
-            if (!cell.getLive() && liveNeighbourCount == 3){
-                newLiveCells.add(new Cell(true, cell.getX(), cell.getY()));
             }
         }
 

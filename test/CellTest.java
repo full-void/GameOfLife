@@ -28,4 +28,31 @@ public class CellTest {
         Cell cell2 = new Cell(false, 1, 1);
         assertEquals(cell1, cell2);
     }
+
+    @Test
+    public void testNextLifeTick() {
+        Cell cell = new Cell(true, 1, 1);
+
+        // Test death by low or high cells
+        boolean aliveNextTick = cell.lifeNextTick(1);
+        assertFalse(aliveNextTick);
+        assertFalse(cell.getLive());
+        cell.setLive(true);
+        aliveNextTick = cell.lifeNextTick(4);
+        assertFalse(aliveNextTick);
+        assertFalse(cell.getLive());
+
+        // Test revival
+        aliveNextTick = cell.lifeNextTick(3);
+        assertTrue(aliveNextTick);
+        assertTrue(cell.getLive());
+
+        // Test unchanged
+        aliveNextTick = cell.lifeNextTick(2);
+        assertTrue(aliveNextTick);
+        assertTrue(cell.getLive());
+        aliveNextTick = cell.lifeNextTick(3);
+        assertTrue(aliveNextTick);
+        assertTrue(cell.getLive());
+    }
 }

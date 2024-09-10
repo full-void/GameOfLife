@@ -36,6 +36,22 @@ public class Cell {
         this.y = y;
     }
 
+    public boolean lifeNextTick(int liveNeighbourCount) {
+        // Cell with less than 2 or greater than 3 neighbour dies due to loneliness or overcrowding
+        if (liveNeighbourCount<2 || liveNeighbourCount > 3) {
+            this.live = false;
+            return false;
+        }
+        // Any dead cell with exactly three live neighbours comes to life
+        if (!this.live && liveNeighbourCount == 3){
+            this.live = true;
+            return true;
+        }
+        // Live cell with two or three live neighbours lives, unchanged, to the next generation
+        // Only this possibility is left
+        return this.live;
+    }
+
     @Override
     public int hashCode() {
         // Only take coordinates into account since two cells with same coordinates but different 'life' can't exist
