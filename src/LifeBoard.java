@@ -1,42 +1,23 @@
 import java.util.*;
 
 public class LifeBoard {
-    protected List<Cell> LiveCells;
+    protected List<Cell> liveCells;
 
     public LifeBoard(List<Cell> liveCells) {
-        this.LiveCells = List.copyOf(liveCells);
+        this.liveCells = List.copyOf(liveCells);
     }
 
     public List<Cell> getLiveCells() {
-        return this.LiveCells;
-    }
-
-    public void printState() {
-        for (Cell cell: LiveCells){
-            System.out.printf("%d, %d%n", cell.getX(), cell.getY());
-        }
+        return this.liveCells;
     }
 
     public void tick() {
-        Set<Cell> pertinentCells = new HashSet<>(this.LiveCells);
-        Set<List<Integer>> liveCoordinates = new HashSet<>();
         Set<Cell> newLiveCells = new HashSet<>();
 
-        // Propagate all cells need to be considered and live cells
-        for (Cell cell : this.LiveCells) {
-            liveCoordinates.add(Arrays.asList(cell.getX(), cell.getY()));
+        Set<List<Integer>> liveCoordinates = getLiveCoordinates();
+        Set<Cell> possiblyAliveCellsNextTick = getPossiblyAliveCellsNextTick();
 
-            // Neighbours
-            for (int deltaX = -1; deltaX <= 1; deltaX++) {
-                for (int deltaY = -1; deltaY <= 1; deltaY++) {
-                    // Docs guarantee that if an element already exists, it's left as is
-                    // Live cells are already added and given hash and equal only take coordinates into account, live cell won't be overwritten
-                    pertinentCells.add(new Cell(false, cell.getX() + deltaX, cell.getY() + deltaY));
-                }
-            }
-        }
-
-        for (Cell cell: pertinentCells) {
+        for (Cell cell: possiblyAliveCellsNextTick) {
             int liveNeighbourCount = getLiveNeighbourCount(cell, liveCoordinates);
             boolean isAliveNextTick = cell.lifeNextTick(liveNeighbourCount);
             if (isAliveNextTick) {
@@ -44,10 +25,42 @@ public class LifeBoard {
             }
         }
 
-        this.LiveCells = newLiveCells.stream().toList();
+        this.liveCells = newLiveCells.stream().toList();
     }
 
-    private static int getLiveNeighbourCount(Cell cell, Set<List<Integer>> liveCoordinates) {
+    private Set<List<Integer>> getLiveCoordinates() {
+        Set<List<Integer>> liveCoordinates = new HashSet<>();
+
+        for (Cell cell : this.liveCells) {
+            liveCoordinates.add(Arrays.asList(cell.getX(), cell.getY()));
+        }
+
+        return liveCoordinates;
+    }
+
+    /**
+     * Computes and returns all cells that could possibly be alive in next tick.
+     * Given that it's an infinite board, all possibly alive cells must be either currently alive cells or their neighbours
+     * @return a Set<Cell> containing all cells possibly alive next tick.
+     */
+    private Set<Cell> getPossiblyAliveCellsNextTick() {
+        Set<Cell> possiblyAliveCellsNextTick = new HashSet<>(this.liveCells);
+
+        // Neighbors
+        for (Cell cell : this.liveCells) {
+            for (int deltaX = -1; deltaX <= 1; deltaX++) {
+                for (int deltaY = -1; deltaY <= 1; deltaY++) {
+                    // Docs guarantee that if an element already exists, it's left as is
+                    // Live cells are already added and given hash and equal only take coordinates into account, live cell won't be overwritten
+                    possiblyAliveCellsNextTick.add(new Cell(false, cell.getX() + deltaX, cell.getY() + deltaY));
+                }
+            }
+        }
+
+        return possiblyAliveCellsNextTick;
+    }
+
+    private int getLiveNeighbourCount(Cell cell, Set<List<Integer>> liveCoordinates) {
         int liveNeighbourCount = 0;
         for (int deltaX = -1; deltaX <= 1; deltaX++) {
             for (int deltaY = -1; deltaY <= 1; deltaY++) {
